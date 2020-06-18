@@ -1,7 +1,7 @@
 from cereal import log, car
 
+from common.realtime import DT_CTRL
 from selfdrive.config import Conversions as CV
-
 from selfdrive.locationd.calibration_helpers import Filter
 
 AlertSize = log.ControlsState.AlertSize
@@ -37,6 +37,7 @@ class Events:
   def __init__(self):
     self.events = []
     self.static_events = []
+    self.events_prev = dict.fromkeys(EVENTS.keys(), 0)
 
   @property
   def names(self):
@@ -51,6 +52,7 @@ class Events:
     self.events.append(event_name)
 
   def clear(self):
+    self.events_prev = {k: (v+1 if k in self.events else 0) for k, v in self.events_prev.items()}
     self.events = self.static_events.copy()
 
   def any(self, event_type):
@@ -59,7 +61,10 @@ class Events:
         return True
     return False
 
-  def create_alerts(self, event_types, callback_args=[]):
+  def create_alerts(self, event_types, callback_args=None):
+    if callback_args is None:
+      callback_args = []
+
     ret = []
     for e in self.events:
       types = EVENTS[e].keys()
@@ -68,8 +73,10 @@ class Events:
           alert = EVENTS[e][et]
           if not isinstance(alert, Alert):
             alert = alert(*callback_args)
-          alert.alert_type = EVENT_NAME[e]
-          ret.append(alert)
+
+          if DT_CTRL * (self.events_prev[e] + 1) >= alert.creation_delay:
+            alert.alert_type = EVENT_NAME[e]
+            ret.append(alert)
     return ret
 
   def add_from_msg(self, events):
@@ -98,7 +105,8 @@ class Alert:
                duration_sound,
                duration_hud_alert,
                duration_text,
-               alert_rate=0.):
+               alert_rate=0.,
+               creation_delay=0.):
 
     self.alert_type = ""
     self.alert_text_1 = alert_text_1
@@ -115,6 +123,7 @@ class Alert:
 
     self.start_time = 0.
     self.alert_rate = alert_rate
+    self.creation_delay = creation_delay
 
     # typecheck that enums are valid on startup
     tst = car.CarControl.new_message()
@@ -158,7 +167,7 @@ class EngagementAlert(Alert):
                      audible_alert, .2, 0., 0.),
 
 def below_steer_speed_alert(CP, sm, metric):
-  speed = CP.minSteerSpeed * (CV.MS_TO_KPH if metric else CV.MS_TO_MPH)
+  speed = int(round(CP.minSteerSpeed * (CV.MS_TO_KPH if metric else CV.MS_TO_MPH)))
   unit = "kph" if metric else "mph"
   return Alert(
     "TAKE CONTROL",
@@ -179,6 +188,10 @@ EVENTS = {
   # ********** events with no alerts **********
 
   EventName.gasPressed: {ET.PRE_ENABLE: None},
+
+  EventName.laneChangeBlocked: {},
+
+  EventName.focusRecoverActive: {},
 
   # ********** events only containing alerts displayed in all states **********
 
@@ -303,14 +316,6 @@ EVENTS = {
       "Lane Departure Detected",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
-  },
-
-  EventName.canErrorPersistent: {
-    ET.PERMANENT: Alert(
-      "CAN Error: Check Connections",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
 
   # ********** events only containing alerts that display while engaged **********
@@ -479,6 +484,11 @@ EVENTS = {
                               duration_hud_alert=0.),
   },
 
+  EventName.wrongCruiseMode: {
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.NO_ENTRY: NoEntryAlert("Enable Adaptive Cruise"),
+  },
+
   EventName.steerTempUnavailable: {
     ET.WARNING: Alert(
       "TAKE CONTROL",
@@ -516,14 +526,21 @@ EVENTS = {
     ET.NO_ENTRY: NoEntryAlert("NEOS Update Required"),
   },
 
-
   EventName.sensorDataInvalid: {
     ET.PERMANENT: Alert(
       "No Data from Device Sensors",
       "Reboot your Device",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=1.),
     ET.NO_ENTRY: NoEntryAlert("No Data from Device Sensors"),
+  },
+
+  EventName.noGps: {
+    ET.PERMANENT: Alert(
+      "Poor GPS reception",
+      "Check GPS antenna placement",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=300.),
   },
 
   EventName.soundsUnavailable: {
@@ -624,6 +641,11 @@ EVENTS = {
 
   EventName.canError: {
     ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN Error: Check Connections"),
+    ET.PERMANENT: Alert(
+      "CAN Error: Check Connections",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=1.),
     ET.NO_ENTRY: NoEntryAlert("CAN Error: Check Connections"),
   },
 

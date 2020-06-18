@@ -697,7 +697,6 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
 
     // Tick fan driver
     fan_tick();
-    //puts("Fan speed: "); puth((unsigned int) fan_rpm); puts("rpm\n");
 
     // set green LED to be controls allowed
     current_board->set_led(LED_GREEN, controls_allowed);
@@ -725,9 +724,15 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
         set_power_save_state(POWER_SAVE_STATUS_ENABLED);
       }
 
-      // Also disable fan and IR when the heartbeat goes missing
-      current_board->set_fan_power(0U);
+      // Also disable IR when the heartbeat goes missing
       current_board->set_ir_power(0U);
+
+      // If enumerated but no heartbeat (phone up, boardd not running), turn the fan on to cool the device
+      if(usb_enumerated()){
+        current_board->set_fan_power(50U);
+      } else {
+        current_board->set_fan_power(0U);
+      }
     }
 
     // enter CDP mode when car starts to ensure we are charging a turned off EON
@@ -755,6 +760,7 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
   TIM9->SR = 0;
 }
 
+#define MAX_FADE 8192U
 int main(void) {
   // Init interrupt table
   init_interrupts(true);
@@ -853,19 +859,23 @@ int main(void) {
       #ifdef DEBUG_FAULTS
       if(fault_status == FAULT_STATUS_NONE){
       #endif
-        int div_mode = ((usb_power_mode == USB_POWER_DCP) ? 4 : 1);
+        uint32_t div_mode = ((usb_power_mode == USB_POWER_DCP) ? 4U : 1U);
 
         // useful for debugging, fade breaks = panda is overloaded
-        for (int div_mode_loop = 0; div_mode_loop < div_mode; div_mode_loop++) {
-          for (int fade = 0; fade < 1024; fade += 8) {
-            for (int i = 0; i < (128/div_mode); i++) {
-              current_board->set_led(LED_RED, 1);
-              if (fade < 512) { delay(fade); } else { delay(1024-fade); }
-              current_board->set_led(LED_RED, 0);
-              if (fade < 512) { delay(512-fade); } else { delay(fade-512); }
-            }
-          }
+        for(uint32_t fade = 0U; fade < MAX_FADE; fade += div_mode){
+          current_board->set_led(LED_RED, true);
+          delay(fade >> 4);
+          current_board->set_led(LED_RED, false);
+          delay((MAX_FADE - fade) >> 4);
         }
+
+        for(uint32_t fade = MAX_FADE; fade > 0U; fade -= div_mode){
+          current_board->set_led(LED_RED, true);
+          delay(fade >> 4);
+          current_board->set_led(LED_RED, false);
+          delay((MAX_FADE - fade) >> 4);
+        }
+
       #ifdef DEBUG_FAULTS
       } else {
           current_board->set_led(LED_RED, 1);

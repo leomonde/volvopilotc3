@@ -54,6 +54,8 @@ openpilot
 notebooks
 xx
 panda_jungle
+apks
+openpilot-apks
 
 .coverage*
 coverage.xml
@@ -62,3 +64,4 @@ htmlcov
 pandaextra
 
 .mypy_cache/
+flycheck_*
