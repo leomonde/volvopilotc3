@@ -520,6 +520,8 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    volvoC1 @25;
+    volvoEUCD @26;
   }
 
   enum SteerControlType {

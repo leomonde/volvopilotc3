@@ -20,8 +20,10 @@ public:
     // TODO: merge again and add EQ in the amp config
     const QString sound_asset_path = Hardware::TICI() ? "../assets/sounds_tici/" : "../assets/sounds/";
     std::tuple<AudibleAlert, QString, bool> sound_list[] = {
-      {AudibleAlert::CHIME_DISENGAGE, sound_asset_path + "disengaged.wav", false},
-      {AudibleAlert::CHIME_ENGAGE, sound_asset_path + "engaged.wav", false},
+      //{AudibleAlert::CHIME_DISENGAGE, sound_asset_path + "disengaged.wav", false},
+      {AudibleAlert::CHIME_DISENGAGE, sound_asset_path + "disengaged_silent.wav", false},
+      //{AudibleAlert::CHIME_ENGAGE, sound_asset_path + "engaged.wav", false},
+      {AudibleAlert::CHIME_ENGAGE, sound_asset_path + "engaged_silent.wav", false},
       {AudibleAlert::CHIME_WARNING1, sound_asset_path + "warning_1.wav", false},
       {AudibleAlert::CHIME_WARNING2, sound_asset_path + "warning_2.wav", false},
       {AudibleAlert::CHIME_WARNING2_REPEAT, sound_asset_path + "warning_2.wav", true},
