@@ -1,0 +1,2 @@
+supercombo.dlc filter=lfs diff=lfs merge=lfs -text
+supercombo.thneed filter=lfs diff=lfs merge=lfs -text
