@@ -23,7 +23,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs):
     ret.carName = "volvo"
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.volvoC1)]
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.volvo)]
     ret.radarUnavailable = True
     ret.autoResumeSng = False
 
