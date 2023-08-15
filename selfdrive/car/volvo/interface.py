@@ -12,10 +12,6 @@ class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController, CarState):
     super().__init__(CP, CarController, CarState)
 
-    # Create variables
-    #self.cruiseState_enabled_prev = False
-    #self.buttonStatesPrev = BUTTON_STATES.copy()
-
   @staticmethod
   def compute_gb(accel, speed):
     return float(accel) / 4.0
@@ -45,24 +41,13 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.44
       ret.steerRatio = 14.7
 
-    # No PID control used. Set to a value, otherwise pid loop crashes.
-    #ret.steerMaxBP = [0.] # m/s
-    #ret.steerMaxV = [1.]
-    #ret.lateralTuning.pid.kpBP = [0.]
-    #ret.lateralTuning.pid.kiBP = [0.]
-    # Tuning factors
-    #ret.lateralTuning.pid.kf = 0.0
-    #ret.lateralTuning.pid.kpV  = [0.0]
-    #ret.lateralTuning.pid.kiV = [0.0]
-
     return ret
 
   # returns a car.CarState
   def _update(self, c):
     ret = self.CS.update(self.cp, self.cp_cam)
 
-    events = self.create_common_events(ret)
-                                       #pcm_enable=not self.CS.CP.openpilotLongitudinalControl,
+    events = self.create_common_events(ret, pcm_enable=not self.CS.out.cruiseState.enabled)
                                        #enable_buttons=(ButtonType.setCruise, ButtonType.resumeCruise))
 
     ret.events = events.to_msg()
@@ -72,11 +57,3 @@ class CarInterface(CarInterfaceBase):
   def apply(self, c, now_nanos):
     return self.CC.update(c, self.CS, now_nanos)
   
-  #def apply(self, c):
-  #  can_sends = self.CC.update(c.enabled, self.CS, self.frame,
-  #                             c.actuators,
-  #                             c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
-  #                             c.hudControl.rightLaneVisible, c.hudControl.leadVisible,
-  #                             c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart)
-  #  self.frame += 1
-  #  return can_sends

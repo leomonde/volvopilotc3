@@ -51,14 +51,16 @@ class CarControllerParams:
   # Normally the car uses STEER_RIGHT and STEER_LEFT.
   # However it's possible to use STEER in C1 platforms.
   # Servo then accepts steering in both directions.
-  STEER_NO = 0
+  NO_STEER = 0
   STEER = 3
 
-  # number of 0 torque samples in a row before trying to restore steering.
+  # number of 0 torque samples allowed in a row.
   # Got one false trigger on motorway with 10. 
   # Increase to 12 is probably a good tradeoff between false triggers 
   # and detecting fault.
-  N_ZERO_TRQ = 12
+  # Going above this threshold triggers steerFaultTemporary.
+  # *2 becuase carState runs in 100Hz.
+  N_ZERO_TRQ = 12*2
   
   def __init__(self, CP):
     self.BUTTONS = [
@@ -69,17 +71,6 @@ class CarControllerParams:
       Button(car.CarState.ButtonEvent.Type.decelCruise, "CCButtons", "ACCMinusBtn", [1]),
       Button(car.CarState.ButtonEvent.Type.cancel, "CCButtons", "ACCStopBtn", [1]),
     ]
-    #pass
-
-#BUTTON_STATES = {
-  #"altButton1": False, # On/Off button
-  #"cancel": False,
-  #"setCruise": False,
-  #"resumeCruise": False,
-  #"accelCruise": False,
-  #"decelCruise": False,
-  #"gapAdjustCruise": False,
-#}   
 
 class CAR:
   V40 = "VOLVO V40 2017"
@@ -118,8 +109,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
 
 FW_VERSIONS = {
   CAR.V40: {
-  (Ecu.unknown, ECU_ADDRESS[CAR.V40]["CEM"], None): [b'31453061 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],  # 0xf1a2
-  (Ecu.eps, ECU_ADDRESS[CAR.V40]["PSCM"], None): [b'31288595 AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],            # 0xf1a2
+  (Ecu.unknown, ECU_ADDRESS[CAR.V40]["CEM"], None): [b'31453061 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],    # 0xf1a2
+  (Ecu.eps, ECU_ADDRESS[CAR.V40]["PSCM"], None): [b'31288595 AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],       # 0xf1a2
   (Ecu.fwdCamera, ECU_ADDRESS[CAR.V40]["FSM"], None): [b'31400454 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],  # 0xf1a2
   }
 }
