@@ -94,24 +94,24 @@ static int volvo_rx_hook(CANPacket_t *to_push) {
       pcm_cruise_check(acc_active);
     }
 
-    // Disengage when accelerator pedal pressed
-    if( (addr == MSG_ACC_PEDAL_VOLVO_V60) && (bus == 0) ) {
-      int acc_ped_val = ((GET_BYTE(to_push, 2) & 0x03) << 8) | GET_BYTE(to_push, 3);
-      if( (acc_ped_val > 100) && (acc_ped_val_prev <= 100) ) {
-        controls_allowed = 0;
-      }
-      acc_ped_val_prev = acc_ped_val;
-    }
+    #// Disengage when accelerator pedal pressed
+    #if( (addr == MSG_ACC_PEDAL_VOLVO_V60) && (bus == 0) ) {
+    #  int acc_ped_val = ((GET_BYTE(to_push, 2) & 0x03) << 8) | GET_BYTE(to_push, 3);
+    #  if( (acc_ped_val > 100) && (acc_ped_val_prev <= 100) ) {
+    #    controls_allowed = 0;
+    #  }
+    #  acc_ped_val_prev = acc_ped_val;
+    #}
 
-    // dont forward if message is on bus 0
-    if( (addr == MSG_FSM0_VOLVO_V60) && (bus == 0) ) {
-      giraffe_forward_camera_volvo = 0;
-    }
+    #// dont forward if message is on bus 0
+    #if( (addr == MSG_FSM0_VOLVO_V60) && (bus == 0) ) {
+    #  giraffe_forward_camera_volvo = 0;
+    #}
 
-    // If LKA msg is on bus 0, then relay is unexpectedly closed
-    if( (safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (addr == MSG_FSM2_VOLVO_V60) && (bus == 0) ) {
-      relay_malfunction_set();
-    }
+    #// If LKA msg is on bus 0, then relay is unexpectedly closed
+    #if( (safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (addr == MSG_FSM2_VOLVO_V60) && (bus == 0) ) {
+    #  relay_malfunction_set();
+    #}
   }
   return valid;
 }
