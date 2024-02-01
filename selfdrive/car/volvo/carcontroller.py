@@ -61,6 +61,47 @@ class CarController():
     startdid = 0xf1a1     # Start with this DID (Data IDentifier, read UDS Spec for more info)
     self.dids = [x for x in range(startdid, startdid+9)]
 
+  def dir_change(self, steer_direction, error):
+    """ Filters out direction changes
+    
+    Uses a simple state machine to determine if we should 
+    block or allow the steer_direction bits to pass thru.
+
+    """
+    
+    dessd = steer_direction
+    dzError = 0 if abs(error) < self.CCP.DEADZONE else error 
+    tState = -1 
+
+    # Update prev with desired if just enabled.
+    self.des_steer_direction_prev = steer_direction if not self.acc_enabled_prev else self.des_steer_direction_prev
+    
+    # Check conditions for state change
+    if self.dir_state == self.UNBLOCKED:
+      tState = self.BLOCKED if (steer_direction != self.des_steer_direction_prev and dzError != 0) else tState
+    elif self.dir_state == self.BLOCKED:
+      if (steer_direction == self.steer_direction_bf_block) or (self.block_steering <= 0) or (dzError == 0):
+        tState = self.UNBLOCKED
+
+    # State transition
+    if tState == self.UNBLOCKED:
+      self.dir_state = self.UNBLOCKED
+    elif tState == self.BLOCKED:
+      self.steer_direction_bf_block = self.des_steer_direction_prev  
+      self.block_steering = self.BLOCK_LEN
+      self.dir_state = self.BLOCKED
+
+    #  Run actions in state
+    if self.dir_state == self.UNBLOCKED:
+      if dzError == 0:
+        steer_direction = self.des_steer_direction_prev # Set old request when inside deadzone
+    if self.dir_state == self.BLOCKED:
+      self.block_steering -= 1
+      steer_direction = self.CCP.STEER_NO
+
+    #print("State:{} Sd:{} Sdp:{} Bs:{} Dz:{:.2f} Err:{:.2f}".format(self.dir_state, steer_direction, self.des_steer_direction_prev, self.block_steering, dzError, error))
+    return steer_direction
+
   def update(self, CC, CS, now_nanos):
 
     """ Controls thread """
@@ -74,8 +115,10 @@ class CarController():
     if (self.frame % 2 == 0):
 
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
+        current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
-        self.SteerCommand.steer_direction = self.CCP.STEER
+        self.SteerCommand.steer_direction = self.CCP.STEER_LEFT if self.SteerCommand.angle_request > 0 else self.CCP.STEER_RIGHT
+        self.SteerCommand.steer_direction = self.dir_change(self.SteerCommand.steer_direction, current_steer_angle-self.SteerCommand.angle_request) # Filter the direction change 
 
       else:
         self.SteerCommand.steer_direction = self.CCP.NO_STEER
@@ -88,6 +131,8 @@ class CarController():
 
       # update stored values
       self.angle_request_prev = self.SteerCommand.angle_request
+      if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
+        self.des_steer_direction_prev = self.SteerCommand.steer_direction  # Used for dir_change function
 
       # Manipulate data from servo to FSM
       # Avoids faults that will stop servo from accepting steering commands.

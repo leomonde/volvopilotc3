@@ -26,10 +26,10 @@ class CarState(CarStateBase):
     # Relaying to FSM (camera)
     self.PSCMInfo = {
       "byte0" : 0,
-      "byte3" : 0,
       "byte4" : 0,
       "byte7" : 0,
       "LKAActive" : 0,
+      "SteeringWheelRateOfChange" : 0,
     }
 
     # Detect if servo stop responding to steering command.
@@ -66,14 +66,12 @@ class CarState(CarStateBase):
       cp.vl["CCButtons"]['ACCResumeBtn']) 
     
     # Update gas and brake
-    ret.gas = cp.vl["PedalandBrake"]['AccPedal'] / 102.3
-    ret.gasPressed = ret.gas > 0.05
+    ret.gas = cp.vl["AccPedal"]['AccPedal'] / 102.3
+    ret.gasPressed = ret.gas > 0.1
     ret.brakePressed = False
 
     # Update gear position
-    self.shifter_values = self.can_define.dv["TCM0"]['GearShifter']
-    can_gear = int(cp.vl["TCM0"]["GearShifter"])
-    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
+    ret.gearShifter = self.parse_gear_shifter('D') # TODO: Gear EUCD
 
     # Belt and doors
     ret.doorOpen = False
@@ -82,9 +80,20 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = False # No signal yet.
 
     # ACC status from camera
-    ret.cruiseState.available = bool(cp_cam.vl["FSM0"]['ACCStatusOnOff'])
-    ret.cruiseState.enabled = bool(cp_cam.vl["FSM0"]['ACCStatusActive'])
-    ret.cruiseState.speed = cp.vl["ACC"]['SpeedTargetACC'] * CV.KPH_TO_MS
+    accStatus = cp_cam.vl["FSM0"]['ACCStatus']
+      
+    if accStatus == 2:
+      # Acc in ready mode
+      ret.cruiseState.available = True
+      ret.cruiseState.enabled = False
+    elif accStatus >= 6:
+      # Acc active
+      ret.cruiseState.available = True
+      ret.cruiseState.enabled = True
+    else:
+      # Acc in a unkown mode
+      ret.cruiseState.available = False
+      ret.cruiseState.enabled = False
 
     # Button and blinkers.
     ret.buttonEvents = self.create_button_events(cp, self.CCP.BUTTONS)
@@ -102,10 +111,10 @@ class CarState(CarStateBase):
     # FSM (camera) checks if LKAActive & LKATorque
     # active when not requested
     self.PSCMInfo["byte0"] = int(cp.vl['PSCM1']['byte0'])
-    self.PSCMInfo["byte3"] = int(cp.vl['PSCM1']['byte3'])
     self.PSCMInfo["byte4"] = int(cp.vl['PSCM1']['byte4'])
     self.PSCMInfo["byte7"] = int(cp.vl['PSCM1']['byte7'])
     self.PSCMInfo["LKAActive"] = int(cp.vl['PSCM1']['LKAActive'])
+    self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
 
     # Check if servo stops responding when acc is active.
     if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
@@ -140,27 +149,25 @@ class CarState(CarStateBase):
       # sig_name, sig_address
       ("VehicleSpeed", "VehicleSpeed1"),
       ("TurnSignal", "MiscCarInfo"),
-      ('ACCStopBtn', "CCButtons"),
       ("ACCOnOffBtn", "CCButtons"),
       ("ACCResumeBtn", "CCButtons"),
       ("ACCSetBtn", "CCButtons"),
       ("ACCMinusBtn", "CCButtons"),
       ("TimeGapIncreaseBtn", "CCButtons"),
       ("TimeGapDecreaseBtn", "CCButtons"),
-
-      ("SpeedTargetACC", "ACC"),
-      ("BrakePedalActive2", "PedalandBrake"),
-      ("AccPedal", "PedalandBrake"),
-      ("BrakePress0", "BrakeMessages"),
-      ("BrakePress1", "BrakeMessages"),
-      ("BrakeStatus", "BrakeMessages"),
-      ("GearShifter", "TCM0"),
-
+      ("AccPedal", "AccPedal"),
+      ("BrakePedal", "BrakePedal"),
+      ("SteeringWheelRateOfChange", "PSCM1"),
+      ("ACCOnOffBtnInv", "CCButtons"),
+      ("ACCResumeBtnInv", "CCButtons"),
+      ("ACCSetBtnInv", "CCButtons"),
+      ("ACCMinusBtnInv", "CCButtons"),
+      ("TimeGapDecreaseBtnInv", "CCButtons"),
+      ("TimeGapIncreaseBtnInv", "CCButtons"),
       ("SteeringAngleServo", "PSCM1"),
       ("LKATorque", "PSCM1"),
       ("LKAActive", "PSCM1"),
       ("byte0", "PSCM1"),
-      ("byte3", "PSCM1"),
       ("byte4", "PSCM1"),
       ("byte7", "PSCM1"),
 
@@ -182,10 +189,8 @@ class CarState(CarStateBase):
       ("diagCEMResp", 0),
       ("diagPSCMResp", 0),
       ("diagCVMResp", 0),
-      ("BrakeMessages", 50),
-      ("ACC", 17),
-      ("PedalandBrake", 100),
-      ("TCM0", 10),
+      ("AccPedal", 100),
+      ("BrakePedal", 50),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)
@@ -211,23 +216,21 @@ class CarState(CarStateBase):
       # sig_name, sig_address, default
       ("byte03", "diagFSMResp"),
       ("byte47", "diagFSMResp"),
-      ("ACCStatusOnOff", "FSM0"),
-      ("ACCStatusActive", "FSM0"),
-      ("TrqLim", "FSM1"),
-      ("LKAAngleReq", "FSM1"),
-      ("Checksum", "FSM1"),
-      ("LKASteerDirection", "FSM1"),
-      ("SET_X_E3", "FSM1"),
-      ("SET_X_B4", "FSM1"),
-      ("SET_X_08", "FSM1"),
-      ("SET_X_02", "FSM1"),
-      ("SET_X_25", "FSM1"),
-   ]
+      ("TrqLim", "FSM2"),
+      ("LKAAngleReq", "FSM2"),
+      ("Checksum", "FSM2"),
+      ("LKASteerDirection", "FSM2"),
+      ("SET_X_22", "FSM2"),
+      ("SET_X_02", "FSM2"),
+      ("SET_X_10", "FSM2"),
+      ("SET_X_A4", "FSM2"),
+      ("ACCStatus", "FSM0"),
+    ]
     # Common checks
     checks = [
       # sig_address, frequency
-      ("FSM0", 100),
-      ("FSM1", 50),
+      ('FSM0', 100),
+      ('FSM2', 50),
       ("diagFSMResp", 0),
     ]
 

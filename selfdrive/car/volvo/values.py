@@ -52,6 +52,9 @@ class CarControllerParams:
   # However it's possible to use STEER in C1 platforms.
   # Servo then accepts steering in both directions.
   NO_STEER = 0
+  STEER_NO = 0
+  STEER_RIGHT = 1
+  STEER_LEFT = 2
   STEER = 3
 
   # number of 0 torque samples allowed in a row.
@@ -61,7 +64,17 @@ class CarControllerParams:
   # Going above this threshold triggers steerFaultTemporary.
   # *2 becuase carState runs in 100Hz.
   N_ZERO_TRQ = 12*2
-  
+
+  # EUCD
+  # When changing steer direction steering request need to be blocked. 
+  # Otherwise servo wont "listen" to the request.
+  # This calibration sets the number of samples to block steering request.
+  BLOCK_LEN = 8
+  # When close to desired steering angle, don't change steer direction inside deadzone.
+  # Since we need to release control of the steering wheel for a brief moment, steering wheel will 
+  # unwind by itself. 
+  DEADZONE = 0.1
+
   def __init__(self, CP):
     self.BUTTONS = [
       Button(car.CarState.ButtonEvent.Type.altButton1, "CCButtons", "ACCOnOffBtn", [1]),
@@ -69,14 +82,14 @@ class CarControllerParams:
       Button(car.CarState.ButtonEvent.Type.resumeCruise, "CCButtons", "ACCResumeBtn", [1]),
       Button(car.CarState.ButtonEvent.Type.accelCruise, "CCButtons", "ACCSetBtn", [1]),
       Button(car.CarState.ButtonEvent.Type.decelCruise, "CCButtons", "ACCMinusBtn", [1]),
-      Button(car.CarState.ButtonEvent.Type.cancel, "CCButtons", "ACCStopBtn", [1]),
+      #Button(car.CarState.ButtonEvent.Type.cancel, "CCButtons", "ACCStopBtn", [1]),
     ]
 
 class CAR:
-  V40 = "VOLVO V40 2017"
+  V60 = "VOLVO V60 2015"
 
 class PLATFORM:
-  C1 = [CAR.V40]
+  EUCD = [CAR.V60]
 
 @dataclass
 class VolvoCarInfo(CarInfo):
@@ -84,12 +97,12 @@ class VolvoCarInfo(CarInfo):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
 CAR_INFO: Dict[str, Optional[Union[VolvoCarInfo, List[VolvoCarInfo]]]] = {
-  CAR.V40: VolvoCarInfo("Volvo V40"),
+  CAR.V60: VolvoCarInfo("Volvo V60"),
 }
 
-ECU_ADDRESS = { 
-  CAR.V40: {"BCM": 0x760, "ECM": 0x7E0, "DIM": 0x720, "CEM": 0x726, "FSM": 0x764, "PSCM": 0x730, "TCM": 0x7E1, "CVM": 0x793},
-  }
+#ECU_ADDRESS = { 
+#  CAR.V40: {"BCM": 0x760, "ECM": 0x7E0, "DIM": 0x720, "CEM": 0x726, "FSM": 0x764, "PSCM": 0x730, "TCM": 0x7E1, "CVM": 0x793},
+#  }
 
 VOLVO_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
   p16(0xf1a2)
@@ -108,24 +121,21 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 FW_VERSIONS = {
-  CAR.V40: {
-  (Ecu.unknown, ECU_ADDRESS[CAR.V40]["CEM"], None): [b'31453061 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],    # 0xf1a2
-  (Ecu.eps, ECU_ADDRESS[CAR.V40]["PSCM"], None): [b'31288595 AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],       # 0xf1a2
-  (Ecu.fwdCamera, ECU_ADDRESS[CAR.V40]["FSM"], None): [b'31400454 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],  # 0xf1a2
+  CAR.V60: {
+  (Ecu.engine, 0x7e0, None): [b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],
+  (Ecu.unknown, 0x726, None): [b'30786853 BK\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],
+  (Ecu.eps, 0x730, None): [b'31340673 AD\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],
+  (Ecu.fwdCamera, 0x764, None): [b'31400454 AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'],
   }
 }
 
 FINGERPRINTS = {
-  CAR.V40: [
-    # V40 2017
-    {8: 8, 16: 8, 48: 8, 64: 8, 85: 8, 101: 8, 112: 8, 114: 8, 117: 8, 128: 8, 176: 8, 192: 8, 208: 8, 224: 8, 240: 8, 245: 8, 256: 8, 272: 8, 288: 8, 291: 8, 293: 8, 304: 8, 325: 8, 336: 8, 352: 8, 424: 8, 432: 8, 437: 8, 464: 8, 472: 8, 480: 8, 528: 8, 608: 8, 624: 8, 640: 8, 648: 8, 652: 8, 656: 8, 657: 8, 681: 8, 693: 8, 704: 8, 707: 8, 709: 8, 816: 8, 832: 8, 848: 8, 853: 8, 864: 8, 880: 8, 912: 8, 928: 8, 943: 8, 944: 8, 968: 8, 970: 8, 976: 8, 992: 8, 997: 8, 1024: 8, 1029: 8, 1061: 8, 1072: 8, 1409: 8},
-    # V40 2015
-    {8: 8, 16: 8, 64: 8, 85: 8, 101: 8, 112: 8, 114: 8, 117: 8, 128: 8, 176: 8, 192: 8, 224: 8, 240: 8, 245: 8, 256: 8, 272: 8, 288: 8, 291: 8, 293: 8, 304: 8, 325: 8, 336: 8, 424: 8, 432: 8, 437: 8, 464: 8, 472: 8, 480: 8, 528: 8, 608: 8, 648: 8, 652: 8, 656: 8, 657: 8, 681: 8, 693: 8, 704: 8, 707: 8, 709: 8, 816: 8, 832: 8, 864: 8, 880: 8, 912: 8, 928: 8, 943: 8, 944: 8, 968: 8, 970: 8, 976: 8, 992: 8, 997: 8, 1024: 8, 1029: 8, 1061: 8, 1072: 8, 1409: 8},
-    # V40 2014
-    {8: 8, 16: 8, 64: 8, 85: 8, 101: 8, 112: 8, 114: 8, 117: 8, 128: 8, 176: 8, 192: 8, 224: 8, 240: 8, 245: 8, 256: 8, 272: 8, 288: 8, 291: 8, 293: 8, 304: 8, 325: 8, 336: 8, 424: 8, 432: 8, 437: 8, 464: 8, 472: 8, 480: 8, 528: 8, 608: 8, 648: 8, 652: 8, 657: 8, 681: 8, 693: 8, 704: 8, 707: 8, 709: 8, 816: 8, 864: 8, 880: 8, 912: 8, 928: 8, 943: 8, 944: 8, 968: 8, 970: 8, 976: 8, 992: 8, 997: 8, 1024: 8, 1029: 8, 1072: 8, 1409: 8},
+  CAR.V60: [
+    {0: 8, 16: 8, 32: 8, 81: 8, 99: 8, 104: 8, 112: 8, 144: 8, 277: 8, 295: 8, 298: 8, 307: 8, 320: 8, 328: 8, 336: 8, 343: 8, 352: 8, 359: 8, 384: 8, 465: 8, 511: 8, 522: 8, 544: 8, 565: 8, 582: 8, 608: 8, 609: 8, 610: 8, 612: 8, 613: 8, 624: 8, 626: 8, 635: 8, 648: 8, 665: 8, 673: 8, 704: 8, 706: 8, 708: 8, 750: 8, 751: 8, 778: 8, 788: 8, 794: 8, 797: 8, 802: 8, 803: 8, 805: 8, 807: 8, 819: 8, 820: 8, 821: 8, 913: 8, 923: 8, 978: 8, 979: 8, 1006: 8, 1021: 8, 1024: 8, 1029: 8, 1039: 8, 1042: 8, 1045: 8, 1137: 8, 1141: 8, 1152: 8, 1174: 8, 1187: 8, 1198: 8, 1214: 8, 1217: 8, 1226: 8, 1240: 8, 1409: 8},
+    {16: 8, 32: 8, 81: 8, 99: 8, 104: 8, 112: 8, 144: 8, 277: 8, 295: 8, 298: 8, 307: 8, 308: 8, 320: 8, 328: 8, 336: 8, 343: 8, 352: 8, 359: 8, 384: 8, 465: 8, 511: 8, 522: 8, 544: 8, 565: 8, 582: 8, 608: 8, 609: 8, 610: 8, 612: 8, 613: 8, 624: 8, 626: 8, 635: 8, 648: 8, 665: 8, 673: 8, 704: 8, 706: 8, 708: 8, 750: 8, 751: 8, 778: 8, 788: 8, 794: 8, 797: 8, 802: 8, 803: 8, 805: 8, 807: 8, 819: 8, 820: 8, 821: 8, 913: 8, 923: 8, 978: 8, 979: 8, 1006: 8, 1021: 8, 1024: 8, 1029: 8, 1039: 8, 1042: 8, 1045: 8, 1137: 8, 1141: 8, 1152: 8, 1174: 8, 1187: 8, 1198: 8, 1214: 8, 1217: 8, 1226: 8, 1240: 8, 1409: 8},
   ],
 }
 
 DBC = {
-  CAR.V40: dbc_dict('volvo_v40_2017_pt', None),
+  CAR.V60: dbc_dict('volvo_v60_2015_pt', None),
 }

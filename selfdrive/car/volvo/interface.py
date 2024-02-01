@@ -34,12 +34,11 @@ class CarInterface(CarInterfaceBase):
     # Assuming all is automatic
     ret.transmissionType = car.CarParams.TransmissionType.automatic
  
-    if candidate == CAR.V40:
-      # Technical specifications
-      ret.mass = 1610 + STD_CARGO_KG
-      ret.wheelbase = 2.647
+    if candidate == CAR.V60:
+      ret.mass = 1750 + STD_CARGO_KG  # All data found at https://www.media.volvocars.com/global/en-gb/models/old-v60/2014/specifications
+      ret.wheelbase = 2.776
       ret.centerToFront = ret.wheelbase * 0.44
-      ret.steerRatio = 14.7
+      ret.steerRatio = 15
 
     return ret
 
