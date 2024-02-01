@@ -82,7 +82,7 @@ static const addr_checks* volvo_init(uint16_t param) {
 static int volvo_rx_hook(CANPacket_t *to_push) {
 
   bool valid = addr_safety_check(to_push, &volvo_rx_checks,
-                                 NULL, NULL, NULL);
+                                 NULL, NULL, NULL, NULL);
 
   if( valid ) {
     int bus = GET_BUS(to_push);
