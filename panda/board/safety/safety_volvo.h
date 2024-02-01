@@ -133,20 +133,18 @@ static int volvo_tx_hook(CANPacket_t *to_send) {
 
 static int volvo_fwd_hook(int bus_num, int addr) {
   int bus_fwd = -1; // fallback to do not forward
-  int addr = GET_ADDR(to_fwd);
-
-  if( !relay_malfunction && giraffe_forward_camera_volvo ) {
-    if( bus_num == 0 ){
-      bool block_msg = (addr == MSG_PSCM1_VOLVO_V60);
-      //bool allw_msg = val_in_arr(addr, ALLOWED_MSG_EUCD, ALLOWED_MSG_EUCD_LEN); // block not relevant msgs
-      bus_fwd = block_msg ? -1 : 2;  // forward bus 0 -> 2
+  
+  if( bus_num == 0 ){
+    bool block_msg = (addr == MSG_PSCM1_VOLVO_V60);
+    if ( !block_msg ) {
+      bus_fwd = 2; // forward 0 -> 2
     }
-
-    if( bus_num == 2 ) {
-      bool block_msg = (addr == MSG_FSM2_VOLVO_V60);  // block if lkas msg
-      if( !block_msg ) {
-        bus_fwd = 0; // forward bus 2 -> 0
-      }
+  }
+  
+  if( bus_num == 2 ) {
+    bool block_msg = (addr == MSG_FSM2_VOLVO_V60);  // block if lkas msg
+    if( !block_msg ) {
+      bus_fwd = 0; // forward bus 2 -> 0
     }
   }
   return bus_fwd;
