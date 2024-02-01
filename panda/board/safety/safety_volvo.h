@@ -90,18 +90,8 @@ static int volvo_rx_hook(CANPacket_t *to_push) {
 
     // check acc status
     if( (addr == MSG_FSM0_VOLVO_V60) && (bus == 2) ) {
-      giraffe_forward_camera_volvo = 1;
-      int acc_status = (GET_BYTE(to_push, 2) & 0x07);
-      bool acc_active = (acc_status >= 6) ? true : false;
-
-      // only allow lateral control when acc active
-      if( acc_active && !acc_active_prev_volvo ) {
-        controls_allowed = 1;
-      }
-      if( !acc_active ) {
-        controls_allowed = 0;
-      }
-      acc_active_prev_volvo = acc_active;
+      bool acc_active = (GET_BYTE(to_push, 2) & 0x07);
+      pcm_cruise_check(acc_active);
     }
 
     // Disengage when accelerator pedal pressed
