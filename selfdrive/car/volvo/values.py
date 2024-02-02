@@ -100,9 +100,9 @@ CAR_INFO: Dict[str, Optional[Union[VolvoCarInfo, List[VolvoCarInfo]]]] = {
   CAR.V60: VolvoCarInfo("Volvo V60"),
 }
 
-#ECU_ADDRESS = { 
-#  CAR.V40: {"BCM": 0x760, "ECM": 0x7E0, "DIM": 0x720, "CEM": 0x726, "FSM": 0x764, "PSCM": 0x730, "TCM": 0x7E1, "CVM": 0x793},
-#  }
+ECU_ADDRESS = { 
+  CAR.V60: {"BCM": 0x760, "ECM": 0x7E0, "DIM": 0x720, "CEM": 0x726, "FSM": 0x764, "PSCM": 0x730, "TCM": 0x7E1, "CVM": 0x793},
+  }
 
 VOLVO_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
   p16(0xf1a2)
