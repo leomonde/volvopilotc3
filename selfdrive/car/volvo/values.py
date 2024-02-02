@@ -104,21 +104,21 @@ ECU_ADDRESS = {
   CAR.V60: {"BCM": 0x760, "ECM": 0x7E0, "DIM": 0x720, "CEM": 0x726, "FSM": 0x764, "PSCM": 0x730, "TCM": 0x7E1, "CVM": 0x793},
   }
 
-#VOLVO_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
-#  p16(0xf1a2)
-#VOLVO_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
-#  p16(0xf1a2)
+VOLVO_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  p16(0xf1a2)
+VOLVO_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
+  p16(0xf1a2)
 
-#FW_QUERY_CONFIG = FwQueryConfig(
-#  requests=[
-#    Request(
-#      [VOLVO_VERSION_REQUEST],
-#      [VOLVO_VERSION_RESPONSE],
-#      bus=0,
-#      #whitelist_ecus=[Ecu.unkown, Ecu.eps, Ecu.fwdCamera],
-#    ),
-#  ],
-#)
+FW_QUERY_CONFIG = FwQueryConfig(
+  requests=[
+    Request(
+      [VOLVO_VERSION_REQUEST],
+      [VOLVO_VERSION_RESPONSE],
+      bus=0,
+      #whitelist_ecus=[Ecu.unkown, Ecu.eps, Ecu.fwdCamera],
+    ),
+  ],
+)
 
 FW_VERSIONS = {
   CAR.V60: {
