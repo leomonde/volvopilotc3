@@ -29,6 +29,17 @@ class CarController():
     # SteerCommand
     self.SteerCommand = SteerCommand
 
+    # V60
+    self.acc_enabled_prev = 0
+    self.des_steer_direction_prev = 0
+    self.dir_state = 0
+    self.block_steering = 0
+    self.steer_direction_bf_block = 0
+    self.des_steer_direction_prev = 0
+    self.UNBLOCKED = 0
+    self.BLOCKED = 1
+    self.BLOCK_LEN = 8
+
     # Diag
     self.doDTCRequests = True  # Turn on and off DTC requests
     self.checkPN = False       # Check partnumbers
@@ -130,6 +141,7 @@ class CarController():
         can_sends.append(volvocan.cancelACC(self.packer))
 
       # update stored values
+      self.acc_enabled_prev = 1
       self.angle_request_prev = self.SteerCommand.angle_request
       if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
         self.des_steer_direction_prev = self.SteerCommand.steer_direction  # Used for dir_change function
