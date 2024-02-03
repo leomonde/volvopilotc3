@@ -30,7 +30,6 @@ class CarState(CarStateBase):
       "byte7" : 0,
       "LKAActive" : 0,
       "SteeringWheelRateOfChange" : 0,
-      "steeringRateDeg" : 0,
     }
 
     # Detect if servo stop responding to steering command.
