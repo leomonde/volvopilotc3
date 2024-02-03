@@ -30,6 +30,7 @@ class CarState(CarStateBase):
       "byte7" : 0,
       "LKAActive" : 0,
       "SteeringWheelRateOfChange" : 0,
+      "steeringRateDeg" : 0,
     }
 
     # Detect if servo stop responding to steering command.
@@ -115,6 +116,7 @@ class CarState(CarStateBase):
     self.PSCMInfo["byte7"] = int(cp.vl['PSCM1']['byte7'])
     self.PSCMInfo["LKAActive"] = int(cp.vl['PSCM1']['LKAActive'])
     self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
+    self.PSCMInfo["steeringRateDeg"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
 
     # Check if servo stops responding when acc is active.
     if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
