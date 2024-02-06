@@ -30,6 +30,7 @@ class CarState(CarStateBase):
       "byte7" : 0,
       "LKAActive" : 0,
       "SteeringWheelRateOfChange" : 0,
+      "steeringRateDeg" : 0,
     }
 
     # Detect if servo stop responding to steering command.
@@ -116,28 +117,38 @@ class CarState(CarStateBase):
     self.PSCMInfo["LKAActive"] = int(cp.vl['PSCM1']['LKAActive'])
     self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
     self.PSCMInfo["steeringRateDeg"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
-    self.PSCMInfo.SteeringAngleServo = float(cp.vl['PSCM1']['SteeringAngleServo'])
+
+    # FSMInfo
+    self.FSMInfo.TrqLim = int(cp_cam.vl['FSM2']['TrqLim']) 
+    self.FSMInfo.LKAAngleReq = float(cp_cam.vl['FSM2']['LKAAngleReq']) 
+    self.FSMInfo.Checksum = int(cp_cam.vl['FSM2']['Checksum']) 
+    self.FSMInfo.LKASteerDirection = int(cp_cam.vl['FSM2']['LKASteerDirection'])
+    # Must use until understand the messaging scheme more...
+    self.FSMInfo.SET_X_22 = int(cp_cam.vl['FSM2']['SET_X_22']) 
+    self.FSMInfo.SET_X_02 = int(cp_cam.vl['FSM2']['SET_X_02']) 
+    self.FSMInfo.SET_X_A4 = int(cp_cam.vl['FSM2']['SET_X_A4']) 
+    self.FSMInfo.SET_X_10 = int(cp_cam.vl['FSM2']['SET_X_10']) 
 
     # Check if servo stops responding when acc is active.
-    if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
-
-      # Reset counter on entry
-      if self.cruiseState_enabled_prev != ret.cruiseState.enabled:
-        self.count_zero_steeringTorque = 0
-
-      # Count up when no torque from servo detected.
-      if ret.steeringTorque == 0:
-        self.count_zero_steeringTorque += 1
-      else:
-        self.count_zero_steeringTorque = 0
-
-      # Set fault if above threshold
-      if self.count_zero_steeringTorque >= self.CCP.N_ZERO_TRQ:
-        ret.steerFaultTemporary = True
-      else:
-        ret.steerFaultTemporary = False
-
-    self.cruiseState_enabled_prev = ret.cruiseState.enabled
+    #if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
+    #
+    #  # Reset counter on entry
+    #  if self.cruiseState_enabled_prev != ret.cruiseState.enabled:
+    #    self.count_zero_steeringTorque = 0
+    #
+    #  # Count up when no torque from servo detected.
+    #  if ret.steeringTorque == 0:
+    #    self.count_zero_steeringTorque += 1
+    #  else:
+    #    self.count_zero_steeringTorque = 0
+    #
+    #  # Set fault if above threshold
+    #  if self.count_zero_steeringTorque >= self.CCP.N_ZERO_TRQ:
+    #    ret.steerFaultTemporary = True
+    #  else:
+    #    ret.steerFaultTemporary = False
+    #
+    #self.cruiseState_enabled_prev = ret.cruiseState.enabled
 
     return ret
 
@@ -157,15 +168,11 @@ class CarState(CarStateBase):
       ("ACCMinusBtn", "CCButtons"),
       ("TimeGapIncreaseBtn", "CCButtons"),
       ("TimeGapDecreaseBtn", "CCButtons"),
+
       ("AccPedal", "AccPedal"),
       ("BrakePedal", "BrakePedal"),
       ("SteeringWheelRateOfChange", "PSCM1"),
-      ("ACCOnOffBtnInv", "CCButtons"),
-      ("ACCResumeBtnInv", "CCButtons"),
-      ("ACCSetBtnInv", "CCButtons"),
-      ("ACCMinusBtnInv", "CCButtons"),
-      ("TimeGapDecreaseBtnInv", "CCButtons"),
-      ("TimeGapIncreaseBtnInv", "CCButtons"),
+      
       ("SteeringAngleServo", "PSCM1"),
       ("LKATorque", "PSCM1"),
       ("LKAActive", "PSCM1"),
@@ -191,6 +198,7 @@ class CarState(CarStateBase):
       ("diagCEMResp", 0),
       ("diagPSCMResp", 0),
       ("diagCVMResp", 0),
+      
       ("AccPedal", 100),
       ("BrakePedal", 50),
     ]
