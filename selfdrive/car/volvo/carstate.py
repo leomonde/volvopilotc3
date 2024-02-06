@@ -116,6 +116,7 @@ class CarState(CarStateBase):
     self.PSCMInfo["LKAActive"] = int(cp.vl['PSCM1']['LKAActive'])
     self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
     self.PSCMInfo["steeringRateDeg"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
+    self.PSCMInfo.SteeringAngleServo = float(cp.vl['PSCM1']['SteeringAngleServo'])
 
     # Check if servo stops responding when acc is active.
     if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
