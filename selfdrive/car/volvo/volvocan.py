@@ -15,12 +15,13 @@ def manipulateServo(packer, CS):
   # Set LKATorque and LKAActive to zero otherwise LKA will be disabled. (Check dbc)
   msg = {
       "LKATorque" : 0,
-      "SteeringAngleServo" : CS.out.steeringAngleDeg,
+      #"SteeringAngleServo" : CS.out.steeringAngleDeg,
+      "SteeringAngleServo" : CS.PSCMInfo.SteeringAngleServo,
       "byte0" : CS.PSCMInfo["byte0"],
       "byte4" : CS.PSCMInfo["byte4"],
       "byte7" : CS.PSCMInfo["byte7"],
       "LKAActive" : CS.PSCMInfo["LKAActive"] & 0xF5,
-      "SteeringWheelRateOfChange" : CS.PSCMInfo["SteeringWheelRateOfChange"],
+      "SteeringWheelRateOfChange" : CS.PSCMInfo["SteeringWheelRateOfChange"], 
   }
 
   return packer.make_can_msg("PSCM1", 2, msg)
