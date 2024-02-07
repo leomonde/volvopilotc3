@@ -60,7 +60,7 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw < 0.1
     
      # Steering
-    ret.steeringAngleDeg = cp.vl["PSCM1"]['SteeringAngleServo']
+    ret.steeringAngleDeg = float(cp.vl["PSCM1"]['SteeringAngleServo'])
     ret.steeringTorque = cp.vl["PSCM1"]['LKATorque'] 
     ret.steeringPressed = bool(cp.vl["CCButtons"]['ACCSetBtn'] or \
       cp.vl["CCButtons"]['ACCMinusBtn'] or \
