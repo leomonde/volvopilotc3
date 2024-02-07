@@ -22,7 +22,6 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
 
     self.diag = diagInfo()
-    self.FSMInfo = FSMInfo()
 
     # Relaying to FSM (camera)
     self.PSCMInfo = {
@@ -119,18 +118,7 @@ class CarState(CarStateBase):
     self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
     self.PSCMInfo["steeringRateDeg"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
 
-    # FSMInfo
-    self.FSMInfo.TrqLim = int(cp_cam.vl['FSM2']['TrqLim']) 
-    self.FSMInfo.LKAAngleReq = float(cp_cam.vl['FSM2']['LKAAngleReq']) 
-    self.FSMInfo.Checksum = int(cp_cam.vl['FSM2']['Checksum']) 
-    self.FSMInfo.LKASteerDirection = int(cp_cam.vl['FSM2']['LKASteerDirection'])
-    # Must use until understand the messaging scheme more...
-    self.FSMInfo.SET_X_22 = int(cp_cam.vl['FSM2']['SET_X_22']) 
-    self.FSMInfo.SET_X_02 = int(cp_cam.vl['FSM2']['SET_X_02']) 
-    self.FSMInfo.SET_X_A4 = int(cp_cam.vl['FSM2']['SET_X_A4']) 
-    self.FSMInfo.SET_X_10 = int(cp_cam.vl['FSM2']['SET_X_10']) 
-
-    # Check if servo stops responding when acc is active.
+      # Check if servo stops responding when acc is active.
     #if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
     #
     #  # Reset counter on entry
