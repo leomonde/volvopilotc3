@@ -125,7 +125,7 @@ class CarController():
     # run at 50hz
     if (self.frame % 2 == 0):
 
-      if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
+      if CC.latActive: #and CS.out.vEgo > self.CP.minSteerSpeed:
         current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
         self.SteerCommand.steer_direction = self.CCP.STEER_LEFT if self.SteerCommand.angle_request > 0 else self.CCP.STEER_RIGHT
