@@ -91,6 +91,7 @@ static int volvo_rx_hook(CANPacket_t *to_push) {
     // check acc status
     if( (addr == MSG_FSM0_VOLVO_V60) && (bus == 2) ) {
       #bool acc_active = (GET_BYTE(to_push, 2) & 0x07);
+      int acc_status = (GET_BYTE(to_push, 2) & 0x07);
       bool acc_active = (acc_status >= 6) ? true : false;
       pcm_cruise_check(acc_active);
     }
