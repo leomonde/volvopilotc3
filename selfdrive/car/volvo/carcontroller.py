@@ -38,7 +38,7 @@ class CarController():
     self.des_steer_direction_prev = 0
     self.UNBLOCKED = 0
     self.BLOCKED = 1
-    self.BLOCK_LEN = 8
+    self.BLOCK_LEN = 16
 
     # Diag
     self.doDTCRequests = True  # Turn on and off DTC requests
