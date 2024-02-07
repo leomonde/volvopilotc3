@@ -13,7 +13,6 @@ class diagInfo():
   diagPSCMResp = 0
   diagCVMResp = 0
 
-
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -117,27 +116,27 @@ class CarState(CarStateBase):
     self.PSCMInfo["LKAActive"] = int(cp.vl['PSCM1']['LKAActive'])
     self.PSCMInfo["SteeringWheelRateOfChange"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
     self.PSCMInfo["steeringRateDeg"] = float(cp.vl['PSCM1']['SteeringWheelRateOfChange'])
+
+    # Check if servo stops responding when acc is active.
+    if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
     
-      # Check if servo stops responding when acc is active.
-    #if ret.cruiseState.enabled and ret.vEgo > self.CP.minSteerSpeed:
-    #
-    #  # Reset counter on entry
-    #  if self.cruiseState_enabled_prev != ret.cruiseState.enabled:
-    #    self.count_zero_steeringTorque = 0
-    #
-    #  # Count up when no torque from servo detected.
-    #  if ret.steeringTorque == 0:
-    #    self.count_zero_steeringTorque += 1
-    #  else:
-    #    self.count_zero_steeringTorque = 0
-    #
-    #  # Set fault if above threshold
-    #  if self.count_zero_steeringTorque >= self.CCP.N_ZERO_TRQ:
-    #    ret.steerFaultTemporary = True
-    #  else:
-    #    ret.steerFaultTemporary = False
-    #
-    #self.cruiseState_enabled_prev = ret.cruiseState.enabled
+      # Reset counter on entry
+      if self.cruiseState_enabled_prev != ret.cruiseState.enabled:
+        self.count_zero_steeringTorque = 0
+    
+      # Count up when no torque from servo detected.
+      if ret.steeringTorque == 0:
+        self.count_zero_steeringTorque += 1
+      else:
+        self.count_zero_steeringTorque = 0
+    
+      # Set fault if above threshold
+      if self.count_zero_steeringTorque >= 200:
+        ret.steerFaultTemporary = True
+      else:
+        ret.steerFaultTemporary = False
+    
+    self.cruiseState_enabled_prev = ret.cruiseState.enabled
 
     return ret
 

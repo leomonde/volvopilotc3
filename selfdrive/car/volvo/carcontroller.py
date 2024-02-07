@@ -38,7 +38,7 @@ class CarController():
     self.des_steer_direction_prev = 0
     self.UNBLOCKED = 0
     self.BLOCKED = 1
-    self.BLOCK_LEN = 16
+    self.BLOCK_LEN = self.CCP.BLOCK_LEN
 
     # Diag
     self.doDTCRequests = True  # Turn on and off DTC requests
@@ -80,7 +80,6 @@ class CarController():
 
     """
     
-    dessd = steer_direction
     dzError = 0 if abs(error) < self.CCP.DEADZONE else error 
     tState = -1 
 
@@ -123,35 +122,35 @@ class CarController():
     can_sends = []
 
     # run at 50hz
-    if (self.frame % 2 == 0):
+    #if (self.frame % 2 == 0):
 
-      if CC.latActive: #and CS.out.vEgo > self.CP.minSteerSpeed:
+    if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
         current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
         self.SteerCommand.steer_direction = self.CCP.STEER_LEFT if self.SteerCommand.angle_request > 0 else self.CCP.STEER_RIGHT
         self.SteerCommand.steer_direction = self.dir_change(self.SteerCommand.steer_direction, current_steer_angle-self.SteerCommand.angle_request) # Filter the direction change 
 
-      else:
+    else:
         self.SteerCommand.steer_direction = self.CCP.NO_STEER
         self.SteerCommand.angle_request = 0
       
-      # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
-      if not CC.latActive and CS.out.cruiseState.enabled \
+    # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
+    if not CC.latActive and CS.out.cruiseState.enabled \
          and CS.out.vEgo > self.CP.minSteerSpeed:
         can_sends.append(volvocan.cancelACC(self.packer))
 
-      # update stored values
-      self.acc_enabled_prev = 1
-      self.angle_request_prev = self.SteerCommand.angle_request
-      if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
+    # update stored values
+    self.acc_enabled_prev = 1
+    self.angle_request_prev = self.SteerCommand.angle_request
+    if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
         self.des_steer_direction_prev = self.SteerCommand.steer_direction  # Used for dir_change function
 
-      # Manipulate data from servo to FSM
-      # Avoids faults that will stop servo from accepting steering commands.
-      can_sends.append(volvocan.manipulateServo(self.packer, CS))
+    # Manipulate data from servo to FSM
+    # Avoids faults that will stop servo from accepting steering commands.
+    can_sends.append(volvocan.manipulateServo(self.packer, CS))
     
-      # send can, add to list.
-      can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
+    # send can, add to list.
+    can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
 
 
     # Send diagnostic requests
