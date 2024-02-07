@@ -131,7 +131,7 @@ class CarState(CarStateBase):
         self.count_zero_steeringTorque = 0
     
       # Set fault if above threshold
-      if self.count_zero_steeringTorque >= 200:
+      if self.count_zero_steeringTorque >= 1000:
         ret.steerFaultTemporary = True
       else:
         ret.steerFaultTemporary = False
