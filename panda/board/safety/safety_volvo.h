@@ -35,19 +35,19 @@ Look in selfdrive/car/volvo/values.py for more information.
 
 
 // safety params
-const SteeringLimits VOLVO_STEERING_LIMITS = {
-  .enforce_angle_error = true,
-  .inactive_angle_is_zero = true,
-  .angle_deg_to_can = 1/.04395,  // 22.753... inverse of dbc scaling 
-  .angle_rate_up_lookup = {
-    {7., 17., 36.},
-    {2, .25, .1}
-  },
-  .angle_rate_down_lookup = {
-    {7., 17., 36.},
-    {2, .25, .1}
-  },
-};
+//const SteeringLimits VOLVO_STEERING_LIMITS = {
+//  .enforce_angle_error = true,
+//  .inactive_angle_is_zero = true,
+//  .angle_deg_to_can = 1/.04395,  // 22.753... inverse of dbc scaling 
+//  .angle_rate_up_lookup = {
+//    {7., 17., 36.},
+//    {2, .25, .1}
+//  },
+//  .angle_rate_down_lookup = {
+//    {7., 17., 36.},
+//    {2, .25, .1}
+//  },
+//};
 
 // TX checks
 // platform eucd
@@ -67,8 +67,8 @@ const int VOLVO_TX_MSGS_LEN = sizeof(VOLVO_TX_MSGS) / sizeof(VOLVO_TX_MSGS[0]);
 // Works fine in C3.
 AddrCheckStruct volvo_checks[] = {
   {.msg = {{MSG_PSCM1_VOLVO_V60,     0, 8, .check_checksum = false, .expected_timestep = 20000U}}},
-  {.msg = {{MSG_FSM0_VOLVO_V60,      2, 8, .check_checksum = false, .expected_timestep = 10000U}}},
-  {.msg = {{MSG_ACC_PEDAL_VOLVO_V60, 0, 8, .check_checksum = false, .expected_timestep = 10000U}}},
+  {.msg = {{MSG_FSM0_VOLVO_V60,      2, 8, .check_checksum = false, .expected_timestep = 20000U}}},
+  {.msg = {{MSG_ACC_PEDAL_VOLVO_V60, 0, 8, .check_checksum = false, .expected_timestep = 20000U}}},
 };
 
 #define VOLVO_RX_CHECKS_LEN sizeof(volvo_checks) / sizeof(volvo_checks[0])
@@ -90,7 +90,8 @@ static int volvo_rx_hook(CANPacket_t *to_push) {
 
     // check acc status
     if( (addr == MSG_FSM0_VOLVO_V60) && (bus == 2) ) {
-      bool acc_active = (GET_BYTE(to_push, 2) & 0x07);
+      #bool acc_active = (GET_BYTE(to_push, 2) & 0x07);
+      bool acc_active = (acc_status >= 6) ? true : false;
       pcm_cruise_check(acc_active);
     }
 
@@ -137,7 +138,8 @@ static int volvo_fwd_hook(int bus_num, int addr) {
   if( bus_num == 0 ){
     bool block_msg = (addr == MSG_PSCM1_VOLVO_V60);
     if ( !block_msg ) {
-      bus_fwd = 2; // forward 0 -> 2
+      //bus_fwd = 2; // forward 0 -> 2
+      bus_fwd = block_msg ? -1 : 2;  // forward bus 0 -> 2
     }
   }
   
