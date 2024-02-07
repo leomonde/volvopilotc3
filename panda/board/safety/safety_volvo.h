@@ -33,6 +33,7 @@ Look in selfdrive/car/volvo/values.py for more information.
 #define MSG_ACC_PEDAL_VOLVO_V60 0x20 // Gas pedal
 #define MSG_BTNS_VOLVO_V60 0x127     // Steering wheel buttons
 
+int acc_ped_val_prev = 0;
 
 // safety params
 //const SteeringLimits VOLVO_STEERING_LIMITS = {
