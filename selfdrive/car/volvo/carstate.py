@@ -22,6 +22,7 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
 
     self.diag = diagInfo()
+    self.FSMInfo = FSMInfo()
 
     # Relaying to FSM (camera)
     self.PSCMInfo = {
