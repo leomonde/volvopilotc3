@@ -15,4 +15,4 @@ if [ -z "$PASSIVE" ]; then
 fi
 
 export STAGING_ROOT="/data/safe_staging"
-export FINGERPRINT="VOLVO V60 2015"
+#export FINGERPRINT="VOLVO V60 2015"
