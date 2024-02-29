@@ -21,7 +21,7 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "volvo"
     ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.volvo)]
     ret.radarUnavailable = True
-    ret.autoResumeSng = False
+    ret.autoResumeSng = True
 
     ret.steerControlType = car.CarParams.SteerControlType.angle
 
