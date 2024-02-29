@@ -35,20 +35,20 @@ Look in selfdrive/car/volvo/values.py for more information.
 
 int acc_ped_val_prev = 0;
 
-// safety params
-//const SteeringLimits VOLVO_STEERING_LIMITS = {
-//  .enforce_angle_error = true,
-//  .inactive_angle_is_zero = true,
-//  .angle_deg_to_can = 1/.04395,  // 22.753... inverse of dbc scaling 
-//  .angle_rate_up_lookup = {
-//    {7., 17., 36.},
-//    {2, .25, .1}
-//  },
-//  .angle_rate_down_lookup = {
-//    {7., 17., 36.},
-//    {2, .25, .1}
-//  },
-//};
+//safety params
+const SteeringLimits VOLVO_STEERING_LIMITS = {
+  .enforce_angle_error = true,
+  .inactive_angle_is_zero = true,
+  .angle_deg_to_can = 1/.04395,  // 22.753... inverse of dbc scaling 
+  .angle_rate_up_lookup = {
+    {7., 17., 36.},
+    {2, .25, .1}
+  },
+  .angle_rate_down_lookup = {
+    {7., 17., 36.},
+    {2, .25, .1}
+  },
+};
 
 // TX checks
 // platform eucd
