@@ -56,7 +56,7 @@ class CarState(CarStateBase):
     # Speeds
     ret.vEgoRaw = cp.vl["VehicleSpeed1"]['VehicleSpeed'] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.vEgoRaw < 0.1
+    ret.standstill = ret.vEgoRaw < 1.
     
      # Steering
     ret.steeringAngleDeg = float(cp.vl["PSCM1"]['SteeringAngleServo'])

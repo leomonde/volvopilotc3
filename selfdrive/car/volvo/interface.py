@@ -24,6 +24,7 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = True
 
     ret.steerControlType = car.CarParams.SteerControlType.angle
+    ret.minEnableSpeed = -1.
 
     # Steering settings
     ret.steerActuatorDelay = 0.2   # Actuator delay from input to output.
