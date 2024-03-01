@@ -38,7 +38,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 1750 + STD_CARGO_KG  # All data found at https://www.media.volvocars.com/global/en-gb/models/old-v60/2014/specifications
       ret.wheelbase = 2.776
       ret.centerToFront = ret.wheelbase * 0.44
-      ret.steerRatio = 15
+      ret.steerRatio = 14 # with 15 oversteering
 
     return ret
 
