@@ -27,7 +27,7 @@ class CarInterface(CarInterfaceBase):
 
     # Steering settings
     ret.steerActuatorDelay = 0.2   # Actuator delay from input to output.
-    ret.minSteerSpeed = 2. * CV.KPH_TO_MS
+    ret.minSteerSpeed = 1. * CV.KPH_TO_MS
     #ret.steerLimitAlert = True     # Do this do anything?
     #ret.steerRateCost = 1.          # Used in pathplanner for punishing? Steering derivative?
 
