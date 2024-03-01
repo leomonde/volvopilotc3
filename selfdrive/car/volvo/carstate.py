@@ -57,6 +57,7 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp.vl["VehicleSpeed1"]['VehicleSpeed'] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw < 1.
+    ret.cruiseState.speed = cp.vl["ACC_Speed"]['ACC_Speed'] * CV.KPH_TO_MS
     
      # Steering
     ret.steeringAngleDeg = float(cp.vl["PSCM1"]['SteeringAngleServo'])
@@ -160,6 +161,7 @@ class CarState(CarStateBase):
       ("AccPedal", "AccPedal"),
       ("BrakePedal", "BrakePedal"),
       ("SteeringWheelRateOfChange", "PSCM1"),
+      ("ACC_Speed", "ACC_Speed"),
       
       ("SteeringAngleServo", "PSCM1"),
       ("LKATorque", "PSCM1"),
@@ -189,6 +191,7 @@ class CarState(CarStateBase):
       
       ("AccPedal", 100),
       ("BrakePedal", 50),
+      ("ACC_Speed", 50),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)
