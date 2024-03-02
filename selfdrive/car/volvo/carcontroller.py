@@ -163,16 +163,16 @@ class CarController():
     # SNG
     # send resume at a max freq of 5Hz
     if (self.frame - self.last_resume_frame) * DT_CTRL > 0.10:
-      if CS.out.standstill and CS.out.vEgo < 0.01 and not self.waiting:
-        self.distance = CS.out.accdistance
+      if CS.carstate.standstill and CS.out.vEgo < 0.01 and not self.waiting:
+        self.distance = CS.carstate.accdistance
         self.waiting = True
-      if CS.out.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.out.accdistance > self.distance:
+      if CS.carstate.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.carstate.accdistance > self.distance:
         # send 25 messages at a time to increases the likelihood of resume being accepted
         can_sends.extend([volvocan.resumeACC(self.packer, self.CP.carFingerprint, CS, 0)] * 25)
         can_sends.extend([volvocan.checkACC(self.packer, self.CP.carFingerprint, CS, 0)] * 25)
         if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.20:
           self.last_resume_frame = self.frame
-      if not CS.out.standstill and self.waiting:
+      if not CS.carstate.standstill and self.waiting:
         self.waiting = False
 
     # Send diagnostic requests
