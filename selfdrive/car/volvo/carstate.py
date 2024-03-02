@@ -97,8 +97,8 @@ class CarState(CarStateBase):
       ret.cruiseState.enabled = False
 
     # SNG
-    ret.cruiseState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
-    ret.cruiseState.accdistance = int(cp_cam.vl["FSM1"]['ACC_Distance'])
+    #ret.cruiseState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
+    #ret.cruiseState.accdistance = int(cp_cam.vl["FSM1"]['ACC_Distance'])
     
     # Button and blinkers.
     ret.buttonEvents = self.create_button_events(cp, self.CCP.BUTTONS)
