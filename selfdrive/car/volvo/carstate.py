@@ -96,6 +96,10 @@ class CarState(CarStateBase):
       ret.cruiseState.available = False
       ret.cruiseState.enabled = False
 
+    # SNG
+    ret.cruiseState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
+    ret.accdistance = int(cp_cam.vl["FSM1"]['ACC_Tracking'])
+    
     # Button and blinkers.
     ret.buttonEvents = self.create_button_events(cp, self.CCP.BUTTONS)
     #self.buttonStates['gapAdjustCruise'] = bool(cp.vl["CCButtons"]['TimeGapIncreaseBtn']) or bool(cp.vl["CCButtons"]['TimeGapDecreaseBtn'])
@@ -226,12 +230,17 @@ class CarState(CarStateBase):
       ("SET_X_10", "FSM2"),
       ("SET_X_A4", "FSM2"),
       ("ACCStatus", "FSM0"),
+      ("ACC_Standstill", "FSM3"),
+      ("ACC_Tracking", "FSM1"),
+
     ]
     # Common checks
     checks = [
       # sig_address, frequency
       ('FSM0', 100),
       ('FSM2', 50),
+      ('FSM3', 50),
+      ('FSM1', 50),
       ("diagFSMResp", 0),
     ]
 
