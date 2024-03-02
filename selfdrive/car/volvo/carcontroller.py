@@ -135,7 +135,7 @@ class CarController():
         self.SteerCommand.angle_request = 0
       
     # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
-    if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > 2: #self.CP.minSteerSpeed:
+    if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
         can_sends.append(volvocan.cancelACC(self.packer))
         #vp check why disengage on traffic jam
         print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
