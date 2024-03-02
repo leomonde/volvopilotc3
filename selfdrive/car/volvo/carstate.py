@@ -72,8 +72,8 @@ class CarState(CarStateBase):
     ret.brakePressed = False
 
     # Auto resume on traffic jam
-    ret.cruiseState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
-    ret.acctracking = int(cp_cam.vl["FSM1"]['ACC_Distance'])
+    ret.CarState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
+    ret.CarState.accdistance = int(cp_cam.vl["FSM1"]['ACC_Distance'])
 
     # Update gear position
     ret.gearShifter = self.parse_gear_shifter('D') # TODO: Gear EUCD
@@ -238,7 +238,7 @@ class CarState(CarStateBase):
       # sig_address, frequency
       ('FSM0', 100),
       ('FSM2', 50),
-      ("FSM3", 50)
+      ("FSM3", 50),
       ("diagFSMResp", 0),
     ]
 
