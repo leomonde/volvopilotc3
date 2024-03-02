@@ -98,7 +98,7 @@ class CarState(CarStateBase):
 
     # SNG
     ret.cruiseState.standstill = bool(cp_cam.vl["FSM3"]['ACC_Standstill'])
-    ret.accdistance = int(cp_cam.vl["FSM1"]['ACC_Tracking'])
+    ret.accdistance = int(cp_cam.vl["FSM1"]['ACC_Distance'])
     
     # Button and blinkers.
     ret.buttonEvents = self.create_button_events(cp, self.CCP.BUTTONS)
@@ -231,7 +231,7 @@ class CarState(CarStateBase):
       ("SET_X_A4", "FSM2"),
       ("ACCStatus", "FSM0"),
       ("ACC_Standstill", "FSM3"),
-      ("ACC_Tracking", "FSM1"),
+      ("ACC_Distance", "FSM1"),
 
     ]
     # Common checks
