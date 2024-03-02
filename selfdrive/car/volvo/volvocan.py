@@ -6,16 +6,16 @@ def cancelACC(packer):
     "ACCOnOffBtn" : 1,
     "ACCOnOffBtnInv" : 0,
   }
-
   return packer.make_can_msg("CCButtons", 0, msg)
 
-def resumeACC(packer, car_fingerprint, CS, bus):
+def resumeACC(packer, bus):
   msg = {
     "ACCResumeBtn" : 1,
     "ACCResumeBtnInv" : 0,
   }
+  return packer.make_can_msg("CCButtons", bus, msg)
 
-def checkACC(packer, car_fingerprint, CS, bus):
+def checkACC(packer, bus):
   msg = {
     "ACC_Check" : 1,
   }

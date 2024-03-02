@@ -168,8 +168,8 @@ class CarController():
         self.waiting = True
       if CS.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.accdistance > self.distance:
         # send 25 messages at a time to increases the likelihood of resume being accepted
-        can_sends.extend([volvocan.resumeACC(self.packer, CS, 0)] * 25)
-        can_sends.extend([volvocan.checkACC(self.packer, CS, 0)] * 25)
+        can_sends.extend([volvocan.resumeACC(self.packer, 0)] * 25)
+        can_sends.extend([volvocan.checkACC(self.packer, 0)] * 25)
         if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.20:
           self.last_resume_frame = self.frame
       if not CS.standstill and self.waiting:
