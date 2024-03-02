@@ -22,8 +22,6 @@ class CarState(CarStateBase):
 
     self.diag = diagInfo()
 
-    self.accdistance = 0
-    
     # Relaying to FSM (camera)
     self.PSCMInfo = {
       "byte0" : 0,
