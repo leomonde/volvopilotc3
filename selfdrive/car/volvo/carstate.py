@@ -239,6 +239,7 @@ class CarState(CarStateBase):
       ('FSM0', 100),
       ('FSM2', 50),
       ("FSM3", 50),
+      ("FSM1", 50),
       ("diagFSMResp", 0),
     ]
 
