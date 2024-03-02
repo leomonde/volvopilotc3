@@ -4,6 +4,7 @@ from opendbc.can.packer import CANPacker
 from selfdrive.car import apply_std_steer_angle_limits
 from selfdrive.car.volvo import volvocan
 from selfdrive.car.volvo.values import CAR, PLATFORM, CarControllerParams
+from common.realtime import DT_CTRL
 
 # Trqlim have no real effect, unused.
 @dataclass
@@ -39,6 +40,11 @@ class CarController():
     self.UNBLOCKED = 0
     self.BLOCKED = 1
     self.BLOCK_LEN = self.CCP.BLOCK_LEN
+
+    # Auto resume on traffic jam
+    self.last_resume_frame = 0
+    self.distance = 0
+    self.waiting = False
 
     # Diag
     self.doDTCRequests = True  # Turn on and off DTC requests
@@ -122,38 +128,52 @@ class CarController():
     can_sends = []
 
     # run at 50hz
-    #if (self.frame % 2 == 0):
+    if (self.frame % 2 == 0):
 
-    if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
+      if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
         current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
         self.SteerCommand.steer_direction = self.CCP.STEER_LEFT if self.SteerCommand.angle_request > 0 else self.CCP.STEER_RIGHT
         self.SteerCommand.steer_direction = self.dir_change(self.SteerCommand.steer_direction, current_steer_angle-self.SteerCommand.angle_request) # Filter the direction change 
 
-    else:
+      else:
         self.SteerCommand.steer_direction = self.CCP.NO_STEER
         self.SteerCommand.angle_request = 0
       
-    # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
-    if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
+      # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
+      if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
         can_sends.append(volvocan.cancelACC(self.packer))
         #vp check why disengage on traffic jam
-        print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
-        print("VP CS.out.vEgo: {} self.CP.minSteerSpeed: {}".format(CS.out.vEgo, self.CP.minSteerSpeed)) 
+        #print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
+        #print("VP CS.out.vEgo: {} self.CP.minSteerSpeed: {}".format(CS.out.vEgo, self.CP.minSteerSpeed)) 
 
-    # update stored values
-    self.acc_enabled_prev = 1
-    self.angle_request_prev = self.SteerCommand.angle_request
-    if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
+      # update stored values
+      self.acc_enabled_prev = 1
+      self.angle_request_prev = self.SteerCommand.angle_request
+      if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
         self.des_steer_direction_prev = self.SteerCommand.steer_direction  # Used for dir_change function
 
-    # Manipulate data from servo to FSM
-    # Avoids faults that will stop servo from accepting steering commands.
-    can_sends.append(volvocan.manipulateServo(self.packer, CS))
+      # Manipulate data from servo to FSM
+      # Avoids faults that will stop servo from accepting steering commands.
+      can_sends.append(volvocan.manipulateServo(self.packer, CS))
     
-    # send can, add to list.
-    can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
+      # send can, add to list.
+      can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
 
+    # Auto resume on traffic jam
+    # send resume at a max freq of 5Hz
+    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.10:
+      if CS.out.CarState.standstill and CS.out.vEgo < 0.01 and not self.waiting:
+        self.distance = CS.out.CarState.accdistance
+        self.waiting = True
+      if CS.out.CarState.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.out.CarState.accdistance > self.distance:
+        # send 25 messages at a time to increases the likelihood of resume being accepted
+        can_sends.extend([volvocan.resumeACC(self.packer, CS, 0)] * 25)
+        can_sends.extend([volvocan.checkACC(self.packer, CS, 0)] * 25)
+        if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.20:
+          self.last_resume_frame = self.frame
+      if not CS.out.CarState.standstill and self.waiting:
+        self.waiting = False
 
     # Send diagnostic requests
     if(self.doDTCRequests):
