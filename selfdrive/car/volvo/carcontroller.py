@@ -167,7 +167,7 @@ class CarController():
 
     # SNG
     # send resume at a max freq of 5Hz
-    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.10:
+    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.20:
       if CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
         self.distance = CS.accdistance
         self.waiting = True
