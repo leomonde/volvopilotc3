@@ -4,7 +4,7 @@ from opendbc.can.packer import CANPacker
 from selfdrive.car import apply_std_steer_angle_limits
 from selfdrive.car.volvo import volvocan
 from selfdrive.car.volvo.values import CAR, PLATFORM, CarControllerParams
-from selfdrive.config import Conversions as CV
+from common.conversions import Conversions as CV
 from common.realtime import DT_CTRL
 
 # Trqlim have no real effect, unused.
