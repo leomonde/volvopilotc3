@@ -4,6 +4,7 @@ from opendbc.can.packer import CANPacker
 from selfdrive.car import apply_std_steer_angle_limits
 from selfdrive.car.volvo import volvocan
 from selfdrive.car.volvo.values import CAR, PLATFORM, CarControllerParams
+from selfdrive.config import Conversions as CV
 from common.realtime import DT_CTRL
 
 # Trqlim have no real effect, unused.
@@ -130,7 +131,11 @@ class CarController():
     # run at 50hz
     if (self.frame % 2 == 0):
 
-      if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
+      # Cancel OP if enabled and ACC not engaged
+      if CC.latActive and not CS.out.cruiseState.enabled:
+        CC.latActive = False
+
+      if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed * MS_TO_KPH:
         current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
         self.SteerCommand.steer_direction = self.CCP.STEER_LEFT if self.SteerCommand.angle_request > 0 else self.CCP.STEER_RIGHT
@@ -141,7 +146,7 @@ class CarController():
         self.SteerCommand.angle_request = 0
       
       # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
-      if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
+      if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed * MS_TO_KPH:
         can_sends.append(volvocan.cancelACC(self.packer))
         #vp check why disengage on traffic jam
         #print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
@@ -150,7 +155,7 @@ class CarController():
       # update stored values
       self.acc_enabled_prev = 1
       self.angle_request_prev = self.SteerCommand.angle_request
-      if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT: # TODO: Move this inside dir_change, think it should work?
+      if self.SteerCommand.steer_direction == self.CCP.STEER_RIGHT or self.SteerCommand.steer_direction == self.CCP.STEER_LEFT:
         self.des_steer_direction_prev = self.SteerCommand.steer_direction  # Used for dir_change function
 
       # Manipulate data from servo to FSM
