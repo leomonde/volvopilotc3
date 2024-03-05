@@ -175,7 +175,7 @@ class CarController():
         # send 25 messages at a time to increases the likelihood of resume being accepted
         can_sends.extend([volvocan.resumeACC(self.packer, 0)] * 25)
         can_sends.extend([volvocan.checkACC(self.packer, 0)] * 25)
-        if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.20:
+        if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.25:
           self.last_resume_frame = self.frame
       if not CS.standstill and self.waiting:
         self.waiting = False
