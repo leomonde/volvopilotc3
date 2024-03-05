@@ -50,6 +50,10 @@ class CarInterface(CarInterfaceBase):
     events = self.create_common_events(ret, pcm_enable=not self.CS.out.cruiseState.enabled)
                                        #enable_buttons=(ButtonType.setCruise, ButtonType.resumeCruise))
 
+    #If max LKA torque is reached and diff from angle request and steer angle is greather than 15 degrees, alert the driver
+    if abs(ret.steeringTorque) >= 49 and abs(CS.out.steeringAngleDeg-self.SteerCommand.angle_request) >= 15:
+      events.add(EventName.steerSaturated)
+
     ret.events = events.to_msg()
 
     return ret

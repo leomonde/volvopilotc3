@@ -658,9 +658,10 @@ class Controls:
             steering_value = actuators.steeringAngleDeg
           else:
             steering_value = actuators.steer
-
-          left_deviation = steering_value > 0 and dpath_points[0] < -0.20
-          right_deviation = steering_value < 0 and dpath_points[0] > 0.20
+          
+          # Increased from 0.20 to 0.50 too many steering alerts
+          left_deviation = steering_value > 0 and dpath_points[0] < -0.50
+          right_deviation = steering_value < 0 and dpath_points[0] > 0.50
 
           if left_deviation or right_deviation:
             self.events.add(EventName.steerSaturated)
