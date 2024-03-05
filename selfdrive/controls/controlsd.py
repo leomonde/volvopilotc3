@@ -659,9 +659,9 @@ class Controls:
           else:
             steering_value = actuators.steer
           
-          # Increased from 0.20 to 0.50 too many steering alerts
-          left_deviation = steering_value > 0 and dpath_points[0] < -0.50
-          right_deviation = steering_value < 0 and dpath_points[0] > 0.50
+          # Increased from 0.20 to 0.25 too many steering alerts
+          left_deviation = steering_value > 0 and dpath_points[0] < -0.25
+          right_deviation = steering_value < 0 and dpath_points[0] > 0.25
 
           if left_deviation or right_deviation:
             self.events.add(EventName.steerSaturated)
