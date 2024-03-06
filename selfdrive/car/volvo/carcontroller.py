@@ -168,15 +168,15 @@ class CarController():
       if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
         self.distance = CS.accdistance
         self.waiting = True
+        self.count = 0
       if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.accdistance > self.distance:
         # send 25 messages at a time to increases the likelihood of resume being accepted
         can_sends.extend([volvocan.resumeACC(self.packer, 0)] * 25)
         can_sends.extend([volvocan.checkACC(self.packer, 0)] * 25)
         self.count = self.count + 1
-      # disable sending resume after 5 cycles or if no more in standstill
-      if (self.count == 5 or not CS.standstill) and self.waiting:
+      # disable sending resume after 5 cycles sent or if no more in standstill
+      if self.waiting and (self.count >= 5 or not CS.standstill):
         self.waiting = False
-        self.count = 0
         self.last_resume_frame = self.frame
 
     # Send diagnostic requests
