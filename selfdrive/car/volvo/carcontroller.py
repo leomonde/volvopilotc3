@@ -166,12 +166,12 @@ class CarController():
       can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
 
     # SNG
-    # send resume at a max freq of 5Hz
-    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.20:
-      if CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
+    # send resume at a max freq of 10Hz
+    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.10:
+      if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
         self.distance = CS.accdistance
         self.waiting = True
-      if CS.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.accdistance > self.distance:
+      if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and self.waiting and CS.accdistance > self.distance:
         # send 25 messages at a time to increases the likelihood of resume being accepted
         can_sends.extend([volvocan.resumeACC(self.packer, 0)] * 25)
         can_sends.extend([volvocan.checkACC(self.packer, 0)] * 25)
