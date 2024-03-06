@@ -78,6 +78,7 @@ class CarController():
     self.last_resume_frame = 0
     self.distance = 0
     self.waiting = False
+    self.count = 0
 
   def dir_change(self, steer_direction, error):
     """ Filters out direction changes
@@ -130,11 +131,7 @@ class CarController():
 
     # run at 50hz
     if (self.frame % 2 == 0):
-
-      # Cancel OP if enabled and ACC not engaged
-      if CC.latActive and not CS.out.cruiseState.enabled:
-        CC.latActive = False
-
+     
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed * CV.MS_TO_KPH:
         current_steer_angle = CS.out.steeringAngleDeg
         self.SteerCommand.angle_request = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.angle_request_prev, CS.out.vEgoRaw, CarControllerParams)
@@ -166,8 +163,8 @@ class CarController():
       can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
 
     # SNG
-    # send resume at a max freq of 10Hz
-    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.10:
+    # wait 50 cycles since last resume     
+    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.50:
       if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
         self.distance = CS.accdistance
         self.waiting = True
@@ -175,10 +172,12 @@ class CarController():
         # send 25 messages at a time to increases the likelihood of resume being accepted
         can_sends.extend([volvocan.resumeACC(self.packer, 0)] * 25)
         can_sends.extend([volvocan.checkACC(self.packer, 0)] * 25)
-        if (self.frame - self.last_resume_frame) * DT_CTRL >= 0.25:
-          self.last_resume_frame = self.frame
-      if not CS.standstill and self.waiting:
+        self.count = self.count + 1
+      # disable sending resume after 5 cycles or if no more in standstill
+      if (self.count == 5 or not CS.standstill) and self.waiting:
         self.waiting = False
+        self.count = 0
+        self.last_resume_frame = self.frame
 
     # Send diagnostic requests
     if(self.doDTCRequests):
