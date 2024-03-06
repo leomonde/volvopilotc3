@@ -660,8 +660,10 @@ class Controls:
             steering_value = actuators.steer
           
           # Increased from 0.20 to 0.30 too many steering alerts
-          left_deviation = steering_value > 0 and dpath_points[0] < -0.30
-          right_deviation = steering_value < 0 and dpath_points[0] > 0.30
+          #left_deviation = steering_value > 0 and dpath_points[0] < -0.30
+          #right_deviation = steering_value < 0 and dpath_points[0] > 0.30
+          left_deviation = steering_value > 0 and dpath_points[0] < -0.20 and CS.steeringTorque >= 49
+          right_deviation = steering_value < 0 and dpath_points[0] > 0.20 and CS.steeringTorque >= 49
 
           if left_deviation or right_deviation:
             self.events.add(EventName.steerSaturated)
