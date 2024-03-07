@@ -129,8 +129,9 @@ class CarController():
     # Send CAN commands.
     can_sends = []
 
-    # run at 50hz
-    if (self.frame % 2 == 0):
+    # run at 50hz 
+    #VP try to recude frequency from 2 to 4
+    if (self.frame % 4 == 0):
      
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed * CV.MS_TO_KPH:
         current_steer_angle = CS.out.steeringAngleDeg
@@ -163,8 +164,8 @@ class CarController():
       can_sends.append(volvocan.create_steering_control(self.packer, self.SteerCommand))
 
     # SNG
-    # wait 50 cycles since last resume     
-    if (self.frame - self.last_resume_frame) * DT_CTRL > 0.50:
+    # wait 100 cycles since last resume sent
+    if (self.frame - self.last_resume_frame) * DT_CTRL > 1.00:
       if CS.out.cruiseState.enabled and CS.standstill and CS.out.vEgo < 0.01 and not self.waiting:
         self.distance = CS.accdistance
         self.waiting = True
