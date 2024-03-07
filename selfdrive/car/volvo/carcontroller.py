@@ -129,9 +129,8 @@ class CarController():
     # Send CAN commands.
     can_sends = []
 
-    # run at 50hz 
-    #VP try to recude frequency from 2 to 4
-    if (self.frame % 4 == 0):
+    # run at 50hz
+    if True: #(self.frame % 2 == 0):
      
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed * CV.MS_TO_KPH:
         current_steer_angle = CS.out.steeringAngleDeg
