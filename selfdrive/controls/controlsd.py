@@ -660,8 +660,8 @@ class Controls:
             steering_value = actuators.steer
           
           # Too many steering alerts, adding troque check
-          left_deviation = steering_value > 0 and dpath_points[0] < -0.20 and CS.steeringTorque >= 49
-          right_deviation = steering_value < 0 and dpath_points[0] > 0.20 and CS.steeringTorque >= 49
+          left_deviation = steering_value > 0 and dpath_points[0] < -0.20 and abs(CS.steeringTorque) >= 49
+          right_deviation = steering_value < 0 and dpath_points[0] > 0.20 and abs(CS.steeringTorque) >= 49
           # VP check
           print("VP steering_value:{} dpath_points[0]:{} CS.steeringTorque:{}".format(steering_value, dpath_points[0], CS.steeringTorque)) 
 
