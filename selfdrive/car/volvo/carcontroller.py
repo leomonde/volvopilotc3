@@ -31,7 +31,7 @@ class CarController():
     # SteerCommand
     self.SteerCommand = SteerCommand
 
-    # V60 test
+    # V60
     self.acc_enabled_prev = 0
     self.des_steer_direction_prev = 0
     self.dir_state = 0
@@ -130,7 +130,7 @@ class CarController():
     can_sends = []
 
     # run at 50hz
-    if True: #(self.frame % 2 == 0):
+    if (self.frame % 2 == 0):
      
       if CC.latActive and CS.out.vEgo > self.CP.minSteerSpeed:
         current_steer_angle = CS.out.steeringAngleDeg
