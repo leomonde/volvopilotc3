@@ -31,7 +31,7 @@ class CarController():
     # SteerCommand
     self.SteerCommand = SteerCommand
 
-    # V60
+    # V60 test
     self.acc_enabled_prev = 0
     self.des_steer_direction_prev = 0
     self.dir_state = 0
