@@ -243,9 +243,9 @@ def main(sm=None, pm=None):
       if sm.frame % 1200 == 0:  # once a minute
         params = {
           'carFingerprint': CP.carFingerprint,
-          'steerRatio': liveParameters.steerRatio,
+          #'steerRatio': liveParameters.steerRatio,
           'stiffnessFactor': liveParameters.stiffnessFactor,
-          'angleOffsetAverageDeg': liveParameters.angleOffsetAverageDeg,
+          #'angleOffsetAverageDeg': liveParameters.angleOffsetAverageDeg,
         }
         put_nonblocking("LiveParameters", json.dumps(params))
 
