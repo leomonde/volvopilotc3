@@ -244,8 +244,10 @@ def main(sm=None, pm=None):
         params = {
           'carFingerprint': CP.carFingerprint,
           #'steerRatio': liveParameters.steerRatio,
+          'steerRatio': CP.steerRatio,
           'stiffnessFactor': liveParameters.stiffnessFactor,
           #'angleOffsetAverageDeg': liveParameters.angleOffsetAverageDeg,
+          'angleOffsetAverageDeg': 0.0,
         }
         put_nonblocking("LiveParameters", json.dumps(params))
 
