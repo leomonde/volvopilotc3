@@ -247,7 +247,7 @@ def main(sm=None, pm=None):
           'steerRatio': CP.steerRatio,
           'stiffnessFactor': liveParameters.stiffnessFactor,
           #'angleOffsetAverageDeg': liveParameters.angleOffsetAverageDeg,
-          'angleOffsetAverageDeg': 0.0,
+          'angleOffsetAverageDeg': clip(-0.2, liveParameters.angleOffsetAverageDeg, 0.2),
         }
         put_nonblocking("LiveParameters", json.dumps(params))
 
