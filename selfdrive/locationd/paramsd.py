@@ -253,6 +253,5 @@ def main(sm=None, pm=None):
 
       pm.send('liveParameters', msg)
 
-
 if __name__ == "__main__":
   main()
