@@ -129,6 +129,14 @@ class CarController():
     # Send CAN commands.
     can_sends = []
 
+    # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
+    if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
+      can_sends.append(volvocan.cancelACC(self.packer))
+      #vp check why disengage on traffic jam
+      #print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
+      #print("VP CS.out.vEgo: {} self.CP.minSteerSpeed: {}".format(CS.out.vEgo, self.CP.minSteerSpeed)) 
+
+
     # run at 50hz
     if (self.frame % 2 == 0):
      
@@ -142,13 +150,6 @@ class CarController():
         self.SteerCommand.steer_direction = self.CCP.NO_STEER
         self.SteerCommand.angle_request = 0
       
-      # Cancel ACC if engaged when OP is not, but only above minimum steering speed.
-      if not CC.latActive and CS.out.cruiseState.enabled and CS.out.vEgo > self.CP.minSteerSpeed:
-        can_sends.append(volvocan.cancelACC(self.packer))
-        #vp check why disengage on traffic jam
-        #print("VP CC.latActive:{} CS.out.cruiseState.enabled:{}".format(CC.latActive, CS.out.cruiseState.enabled)) 
-        #print("VP CS.out.vEgo: {} self.CP.minSteerSpeed: {}".format(CS.out.vEgo, self.CP.minSteerSpeed)) 
-
       # update stored values
       self.acc_enabled_prev = 1
       self.angle_request_prev = self.SteerCommand.angle_request

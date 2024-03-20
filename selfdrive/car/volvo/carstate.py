@@ -59,7 +59,7 @@ class CarState(CarStateBase):
     #ret.standstill = ret.vEgoRaw < 0.1
     #ret.cruiseState.speed = cp.vl["ACC_Speed"]['ACC_Speed'] * CV.KPH_TO_MS
     # vp diagnostic
-    ret.cruiseState.speed = (cp.vl["PSCM1"]['SteeringAngleServo'] * 10 + 100) / 3.6
+    ret.cruiseState.speed = (int(cp_cam.vl["FSM1"]['ACC_Distance'])) / 3.6
     
      # Steering
     ret.steeringAngleDeg = float(cp.vl["PSCM1"]['SteeringAngleServo'])
