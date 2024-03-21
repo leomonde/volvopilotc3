@@ -59,7 +59,7 @@ class CarState(CarStateBase):
     #ret.standstill = ret.vEgoRaw < 0.1
     #ret.cruiseState.speed = cp.vl["ACC_Speed"]['ACC_Speed'] * CV.KPH_TO_MS
     # vp diagnostic
-    ret.cruiseState.speed = (int(cp_cam.vl["FSM1"]['ACC_Distance'])) / 3.6
+    ret.cruiseState.speed = (int(cp_cam.vl["FSM4"]['ACC_LeadSpeed'])) / 3.6
     
      # Steering
     ret.steeringAngleDeg = float(cp.vl["PSCM1"]['SteeringAngleServo'])
@@ -234,15 +234,17 @@ class CarState(CarStateBase):
       ("ACCStatus", "FSM0"),
       ("ACC_Standstill", "FSM3"),
       ("ACC_Distance", "FSM1"),
-
+      ("ACC_LeadSpeed", "FSM4"),
     ]
+    
     # Common checks
     checks = [
       # sig_address, frequency
       ('FSM0', 100),
+      ('FSM1', 50),
       ('FSM2', 50),
       ('FSM3', 50),
-      ('FSM1', 50),
+      ('FSM4', 50),
       ("diagFSMResp", 0),
     ]
 
