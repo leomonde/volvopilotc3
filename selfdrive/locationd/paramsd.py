@@ -245,7 +245,7 @@ def main(sm=None, pm=None):
           'carFingerprint': CP.carFingerprint,
           'steerRatio': clip(14, liveParameters.steerRatio, 16),
           'stiffnessFactor': liveParameters.stiffnessFactor,
-          'angleOffsetAverageDeg': clip(-0.2, liveParameters.angleOffsetAverageDeg, 0.2),
+          'angleOffsetAverageDeg': clip(-5, liveParameters.angleOffsetAverageDeg, 5),
         }
         put_nonblocking("LiveParameters", json.dumps(params))
 
